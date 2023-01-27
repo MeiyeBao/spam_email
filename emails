@@ -1,0 +1,62 @@
+import pandas as pd
+import numpy as np
+import os
+from sklearn.datasets import load_files
+
+import time
+
+
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn import svm
+
+
+# read data from a file and turn into a list
+def get_base_emails():
+
+    X,y = [], []
+    email = load_files('enron1')
+    X = np.append(X, email.data)
+    y = np.append(y, email.target)
+    return X, y
+
+
+# Text cleaning and pre-processing
+def split_dataset(data):
+    print('Dataset Preview:', data.columns)
+    z = data['v2']
+    y = data["v1"]
+    z_train, z_test, y_train, y_test = train_test_split(z, y, test_size=0.2)
+
+    return z_train, z_test, y_train, y_test
+
+
+def extract_features(z_train):
+    cv = CountVectorizer()
+    features = cv.fit_transform(z_train)
+
+    return cv, features
+
+
+def build_model(features):
+    model = svm.SVC()
+    fitted_model = model.fit(features, y_train)
+    return model, fitted_model
+
+
+def check_accuracy(cv, model):
+    features_test = cv.transform(z_test)
+    print("Accuracy: {}".format(model.score(features_test, y_test)))
+
+
+if __name__ == "__main__":
+    training_data = get_base_emails()
+    print(training_data.head())
+
+
+    # spam = pd.read_csv('spam.csv')
+    # z_train, z_test, y_train, y_test = split_dataset(spam)
+    # cv, features = extract_features(z_train)
+    # model, fitted_model = build_model(features)
+    # features_test = cv.transform(z_test)
+    # print("Accuracy: {}".format(model.score(features_test, y_test)))
